@@ -1,0 +1,10 @@
+ajeitar o pct_keep (slider?)
+tamanho do df (último jogador tem que scroll down pra ver)
+gráficos no final?
+jeito melhor de agrupar atributos (por tipo? passe, defesa, etc)
+refazer design (botar coisas uma do lado da outra, etc)
+opção de dict_stats default
+dar nomes melhores pros atributos
+selecionar ligas disponíveis?
+permitir importação de dados?
+diferentes métodos de forecast (padrão, naive, custom)

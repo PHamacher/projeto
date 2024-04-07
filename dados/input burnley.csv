@@ -1,0 +1,15 @@
+Parameter,Value
+Team,Burnley
+Formation,4-3-3
+Budget,91.6
+time_limit,60
+age_limit,26
+pct_keep,6
+starting 11,1
+own_players_val,1
+Drib_SCA,0.2
+Att 3rd_Pressures,0.2
+GCA_GCA,0.2
+Cmp_Medium,0.2
+PassLive_SCA,0.2
+Carries_Carries,0.2

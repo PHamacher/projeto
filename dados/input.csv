@@ -1,0 +1,19 @@
+Parameter,Value
+Team,Villarreal
+Formation,4-1-4-1
+Budget,5000
+time_limit,300
+age_limit,45
+pct_keep,0
+starting 11,1
+own_players_val,1
+Tkl+Int,0.7
+Clr,0.7
+SCA_SCA,0.7
+PrgDist_Total,0.7
+xA,0.7
+Succ_Take,0.7
+PrgDist_Carries,0.7
+PrgR_Receiving,0.7
+Gls,0.7
+PSxG+_per__minus__Expected,0.7

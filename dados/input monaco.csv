@@ -1,0 +1,17 @@
+Parameter,Value
+Team,Monaco
+Formation,3-4-3
+Budget,344.2
+time_limit,600
+age_limit,25.8
+pct_keep,.71
+starting 11,0
+own_players_val,1
+Att 3rd_Tackles,.95
+Def_SCA,.95
+PSxG+_per__minus__Expected,.75
+Gls_Standard,.75
+Final_Third_Carries,.75
+PrgR_Receiving,.75
+PrgDist_Total,.75
+KP,.75
