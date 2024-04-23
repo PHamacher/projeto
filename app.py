@@ -56,7 +56,7 @@ data['Value'] = data['Value'] / 10**6
 jl.include("python.jl")
 
 
-starting = st.checkbox("Only starters", value = True)
+starting = st.checkbox("Only starters", value = False)
 teams = data['Squad'].unique()
 teams.sort()
 team = st.selectbox("Team", teams)
@@ -89,10 +89,14 @@ if st.button("Run"):
     df = df.map(lambda x: str(x))
     df.columns = jl.names(x[0])
 
-    df['Apps'] = df['Apps'].map(lambda x: int(x))
-    sorted_apps = df['Apps'].sort_values(ascending=False)
-    limit = sorted_apps.iloc[10]
-    filtered = df[df['Apps'] >= limit]
+    if starting:
+        df['Apps'] = ''
+        filtered = df
+    else:
+        df['Apps'] = df['Apps'].map(lambda x: int(x))
+        sorted_apps = df['Apps'].sort_values(ascending=False)
+        limit = sorted_apps.iloc[10]
+        filtered = df[df['Apps'] >= limit]
 
     plt = desenha_campo(formation, filtered)
     st.pyplot(plt)
