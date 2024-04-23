@@ -89,10 +89,10 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     if formation == "Any" # test all formations
         formation_results = [recommend_signings_multi_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
-                                age_limit = age_limit, min_keep = min_keep, own_players_val = own_players_val,
-                                formation=formation, budget=budget, scenarios=scenarios, max_players=max_players) for (formation,v) in dict_formations]
+                                age_limit = age_limit, pct_keep = pct_keep, own_players_val = own_players_val,
+                                formation=formation, budget=budget, scenarios=scenarios, max_players=max_players, gap=gap, healthy=healthy) for (formation,v) in dict_formations]
         val, idx = findmax(map(x -> x[3], formation_results))
-        return formation_results[idx], formation
+        return formation_results[idx]
     end
 
     data = deepcopy(data_orig)
