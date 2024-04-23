@@ -8,7 +8,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
     data = deepcopy(data_orig)
 
     if formation == "Any" # test all formations
-        formation_results = [recommend_signings(team, season, dict_stats; time_limit = time_limit,
+        formation_results = [recommend_signings_single_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
                                 age_limit = age_limit, min_keep = min_keep, own_players_val = own_players_val,
                                 formation=formation, budget=budget) for (formation,v) in dict_formations]
         val, idx = findmax(map(x -> x[3], formation_results))
@@ -68,7 +68,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 
     if termination_status(model) == MOI.INFEASIBLE
         @warn "It is impossible to build a team respecting such constraints"
-        return data[[],:], 0.0, 0.0
+        return data[[],:], 0.0, 0.0, ""
     end
 
     rs = sort(data[findall(x -> abs(x) > 10^(-12), JuMP.value.(x).data),:], [:Position], lt=position_sort)
@@ -81,7 +81,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 
     ret = rs[:, vcat("Player", "Squad", "Position", "Age", "Value", [k for k in keys(dict_stats)])]
     ret[:,4:end] = round.(ret[:,4:end], digits=2)
-    return ret, sum(rs.Value), round(mean(score), digits=4)
+    return ret, sum(rs.Value), round(mean(score), digits=4), formation
 end
 
 function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
@@ -92,7 +92,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
                                 age_limit = age_limit, min_keep = min_keep, own_players_val = own_players_val,
                                 formation=formation, budget=budget, scenarios=scenarios, max_players=max_players) for (formation,v) in dict_formations]
         val, idx = findmax(map(x -> x[3], formation_results))
-        return formation_results[idx]
+        return formation_results[idx], formation
     end
 
     data = deepcopy(data_orig)
@@ -173,7 +173,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     if termination_status(model) == MOI.INFEASIBLE
     @warn "It is impossible to build a team respecting such constraints"
-    return data[[],:], 0.0, 0.0
+    return data[[],:], 0.0, 0.0, ""
     end
 
     rs = sort(data[findall(x -> abs(x) > 10^(-12), JuMP.value.(x).data),:], [:Position], lt=position_sort)
@@ -189,7 +189,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     idx(url) = findfirst(x -> x.Url == url, eachrow(data))
     ret = rs[:, vcat("Player", "Squad", "Position", "Apps", "Age", "Value", [k for k in keys(dict_stats)])]
     ret[:,5:end] = round.(ret[:,5:end], digits=2)
-    return ret, sum(rs.Value), round(mean(score), digits=4)
+    return ret, sum(rs.Value), round(mean(score), digits=4), formation
 
     # return rs, sum(rs.Value), mean(score), rsy, healthy[[idx(url) for url in rs.Url],:], pre_game_stats[[idx(url) for url in rs.Url],:,:]
 end

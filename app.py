@@ -98,7 +98,7 @@ if st.button("Run"):
         limit = sorted_apps.iloc[10]
         filtered = df[df['Apps'] >= limit]
 
-    plt = desenha_campo(formation, filtered)
+    plt = desenha_campo(x[3], filtered)
     st.pyplot(plt)
 
     st.markdown("Recommended squad:")
