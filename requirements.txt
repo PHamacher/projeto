@@ -1,3 +1,5 @@
 juliacall
 pandas
 datetime
+numpy
+matplotlib

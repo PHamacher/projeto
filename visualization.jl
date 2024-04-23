@@ -251,7 +251,7 @@ function desenha_campo(form::AbstractString, df_orig::DataFrame; team_color = :w
     # scatter!(dic_formações[form], series_annotations = text.(rand(1:100,10), 10, :top), color = team_color, markersize = 8, msc = secondary_color)
     # scatter!([5], [34], series_annotations = text.(names[1], 10, :top), color = :black, markersize = 8, msc = :white)
 
-    df[3,:Player] = ""
+    # df[3,:Player] = ""
     scatter!(dic_formações[form], color = team_color, markersize = 8, msc = secondary_color)
     annotate!(dic_formações[form][1], dic_formações[form][2] .+ 1.5, text.(df.Player[2:end], 10, :bottom))
     annotate!(dic_formações[form][1], dic_formações[form][2] .- 1.5, text.(df.Apps[2:end], 10, :top))
