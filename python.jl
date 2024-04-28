@@ -1,6 +1,5 @@
-using JuMP, Gurobi, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
+using JuMP, Gurobi, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions, GLM
 
-# include("Matérias PUC\\23.1\\prog mat\\projeto\\utils.jl")
 include("utils.jl")
 function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
                             age_limit = 45, min_keep::Int64 = 11, starting11::Bool = true, own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0)
@@ -85,7 +84,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 end
 
 function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
-    age_limit = 45, pct_keep::Float64 = 0., own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix)
+    age_limit = 45, pct_keep::Float64 = 0., own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix, pred_method::String="Naïve")
 
     if formation == "Qualquer" # test all formations
         formation_results = [recommend_signings_multi_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
@@ -141,7 +140,28 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     pre_game_stats = zeros(length(I), length(S), scenarios)
 
     for (k,stat) in enumerate([stat for stat in keys(dict_stats_normalized)])
-        pre_game = hcat([repeat([el], scenarios) for el in data[:,stat]]...) # SxI (inverter?)
+        if pred_method == "Naïve"
+            pre_game = hcat([repeat([el], scenarios) for el in data[:,stat]]...) # SxI (inverter?)
+        elseif pred_method == "Normal"
+            # if minimum(data[:,stat]) >= 0 # valores inteiros, mais realista, mas variação está muito grande
+            #     pre_game = hcat([rand(Poisson(el), scenarios) for el in data[:,stat]]...) # SxI (inverter?)
+            # else
+                pre_game = hcat([el == 0 ? zeros(scenarios) : rand(Normal(el, 2/3*std(data[:,stat])), scenarios) for el in data[:,stat]]...) # SxI (inverter?)
+            # end
+        elseif pred_method == "Séries temporais"
+            stat_ = stat == "PrgR_Receiving" ? "Prog_Receiving" : stat # generalizar com get(dict)
+            stat_ = get(Dict("PrgR_Receiving" => "Prog_Receiving", "Succ_Take" => "Succ_Dribbles"), stat, stat)
+            pos_ = [dict_positions[pos] for pos in data.Position]
+            X = [ones(size(data,1)) data[:,stat] data.Age data.Age .^ 2 pos_ .== "FW" pos_ .== "GK" pos_ .== "MF"]
+            coefs_vcov = df_regs[:,stat_]
+            eta = X * coefs_vcov[1:7]
+            vc = reshape(coefs_vcov[8:end], 7, 7)
+            vcovXnewT = vc*X'
+            stdeta = [sqrt(GLM.dot(view(X, i, :), view(vcovXnewT, :, i))) for i in axes(X,1)]
+            lower, upper = eta .- 1.96*stdeta, eta .+ 1.96*stdeta
+            dists = Normal.(eta,(eta-lower)/1.96)
+            pre_game = hcat([rand(dist, scenarios) for dist in dists]...) # SxI (inverter?)
+        end
 
         pre_game_stats[:,k,:] = permutedims(pre_game) 
     end
@@ -196,7 +216,7 @@ end
 
 
 function recommended_signings(team::String, season::Int64, dict_stats; time_limit::Float64 = 60.0,
-    age_limit = 45, pct_keep::Float64 = 0., starting11::Bool = false, own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix=Matrix(undef, 1, 1))
+    age_limit = 45, pct_keep::Float64 = 0., starting11::Bool = false, own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix=Matrix(undef, 1, 1), pred_method::String="Naïve")
     
     data = CSV.read("dados/dados$season.csv", DataFrame)
     replace!(data.Position, "midfield" => "Centre-Back", "Second Striker" => "Centre-Forward", "Right Midfield" => "Right Winger", "Left Midfield" => "Left Winger", "attack" => "Left Winger")
@@ -216,6 +236,6 @@ function recommended_signings(team::String, season::Int64, dict_stats; time_limi
         data.Injury_Prob = data.Injury_Prob .+ (1/yell + 1/red)
 
         return recommend_signings_multi_stage(team, data, df_means, dict_stats; time_limit = time_limit,
-            age_limit = age_limit, pct_keep = pct_keep, own_players_val = own_players_val, formation=formation, budget=budget, scenarios=scenarios, max_players=50, gap=gap, foreigners=foreigners, healthy=healthy)
+            age_limit = age_limit, pct_keep = pct_keep, own_players_val = own_players_val, formation=formation, budget=budget, scenarios=scenarios, max_players=50, gap=gap, foreigners=foreigners, healthy=healthy, pred_method=pred_method)
     end
 end

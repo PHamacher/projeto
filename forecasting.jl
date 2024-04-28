@@ -13,9 +13,9 @@ df_all[!, idx_stats] = [(isa(el, Real) ? el : parse(Float64, el)) for el in mtx_
 sort!(df_all, :Url)
 players = groupby(df_all, :Url)
 
-dict_reg = Dict{String, StatsModels.TableRegressionModel}()
+# dict_reg = Dict{String, StatsModels.TableRegressionModel}()
+df_regs = DataFrame()
 for stat in names(df_all)[idx_stats]
-
     sizes_ = [size(player,1) for player in players]
     sizes(i::UnitRange{Int64}) = collect(i) != Int64[] ? sizes_[i] : 1
     idxX = vcat([collect(cumsum(sizes(1:i-1))[end]+1:cumsum(sizes(1:i))[end]-1) for i in 1:length(players) if sizes_[i] > 1]...)
@@ -23,15 +23,18 @@ for stat in names(df_all)[idx_stats]
 
     df_reg = DataFrame(Y = Float64.(df_all[idxY, stat]), Lag = Float64.(df_all[idxX,stat]), Age = Float64.(df_all[idxY,:Age]), Pos = map(x->x[1:2], df_all[idxY,:Pos]))
     reg = lm(@formula(Y~Lag+Age+Age^2+Pos), df_reg)
-    if DataFrame(coeftable(reg))[4,5] > .05
-        reg = lm(@formula(Y~Lag+Age+Pos), df_reg)
-    end
-    if DataFrame(coeftable(reg))[3,5] > .05
-        reg = lm(@formula(Y~Lag+Pos), df_reg)
-    end
+    # if DataFrame(coeftable(reg))[4,5] > .05
+    #     reg = lm(@formula(Y~Lag+Age+Pos), df_reg)
+    # end
+    # if DataFrame(coeftable(reg))[3,5] > .05
+    #     reg = lm(@formula(Y~Lag+Pos), df_reg)
+    # end
     # re-estimar sem coeficientes não-relevantes
 
-    dict_reg[stat] = reg
+    vc = vcat(vcov(reg)...)
+    df_regs[!, stat] = vcat(coef(reg), vc)
 end
 
 dict_positions = Dict("Goalkeeper"=>"GK","Left-Back"=>"DF","Centre-Back"=>"DF","Right-Back"=>"DF","Defensive Midfield"=>"MF","Central Midfield"=>"MF","Attacking Midfield"=>"MF","Right Winger"=>"FW","Left Winger"=>"FW","Centre-Forward"=>"FW")
+
+CSV.write("dados/regs.csv", df_regs)

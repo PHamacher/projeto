@@ -80,3 +80,6 @@ europe = ["GER", "ESP", "DEN", "FRA", "POR", "ITA", "SUI", "ENG", "NED", "ROU", 
 africa = ["SEN", "MAR", "CIV", "MLI", "GHA", "NGA", "CMR", "ALG", "EQG", "GAM", "TUN", "GNB", "CGO", "BFA", "BEN", "TOG", "COD", "CTA", "GUI", "GAB", "ZIM", "ANG", "ZAM", "EGY", "COM", "CPV", "MOZ", "SLE", "BDI"]
 america = ["BRA", "ARG", "CHI", "MEX", "URU", "CAN", "HON", "USA", "PAR", "COL", "ECU", "MTQ", "CRC", "GLP", "VEN", "JAM", "PER", "GRN", "SUR", "GUF"]
 asia = ["JPN", "TUR", "AUS", "UZB", "PHI", "ARM", "KOR", "NZL", "ISR", "IRN"]
+
+df_regs = CSV.read("dados/regs.csv", DataFrame)
+dict_positions = Dict("Goalkeeper"=>"GK","Left-Back"=>"DF","Centre-Back"=>"DF","Right-Back"=>"DF","Defensive Midfield"=>"MF","Central Midfield"=>"MF","Attacking Midfield"=>"MF","Right Winger"=>"FW","Left Winger"=>"FW","Centre-Forward"=>"FW")

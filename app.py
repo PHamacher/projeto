@@ -278,6 +278,7 @@ for stat in stats:
     pct = st.slider(f"Percentil de {stat}", 0, 100)
     dict_stats.update({pt_to_eng[stat]: pct/100})
 
+pred_method = st.radio("Método de previsão", ['Naïve', 'Normal', 'Séries temporais'], index = 0)
 formation = st.selectbox("Esquema tático", ['Qualquer', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])
 budget = float(st.slider("Orçamento (milhões de euros)", 0, 1500))
 age = float(st.slider("Valor máximo para a idade média", 17, 42))
@@ -293,7 +294,7 @@ else:
 
 if st.button("Otimizar"):
 
-    x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios)    
+    x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
     df = pd.DataFrame(jl.eachrow(x[0]))
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
