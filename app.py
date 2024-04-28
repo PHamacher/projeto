@@ -173,7 +173,7 @@ col_names_pt = [
         "Passes para dentro da área",
         "Cruzamentos para dentro da área",
         "Passes progressivos",
-        "Tentativas de passes"
+        "Tentativas de passes",
         "Passes durante o jogo",
         "Passes em bola parada",
         "Passes em cobranças de faltas",
@@ -190,7 +190,6 @@ col_names_pt = [
         "Passes bloqueados",
         "Toques na bola",
         "Toques na própria área",
-        "Toques na defesa",
         "Toques no terço defensivo",
         "Toques no terço médio",
         "Toques no terço ofensivo",
@@ -263,8 +262,24 @@ data = data.loc[:,~data.columns.duplicated()]
 positions_pt = {'Goalkeeper': 'Goleiro', 'Centre-Back': 'Zagueiro', 'Right-Back': 'Lateral Direito', 'Left-Back': 'Lateral Esquerdo', 'Defensive Midfield': 'Volante', 'Central Midfield': 'Meia Central', 'Right Midfield': 'Meia Direita', 'Left Midfield': 'Meia Esquerda', 'Attacking Midfield': 'Meia Ofensiva', 'Centre-Forward': 'Centroavante', 'Second Striker': 'Segundo Atacante', 'Right Winger': 'Ponta Direita', 'Left Winger': 'Ponta Esquerda'}
 data['Posição'] = data['Posição'].map(positions_pt)
 
-jl.include("python.jl")
+prioridades = pd.read_csv("dados/prioridades de atributos.csv")
+idx_pri = [prioridades['Prioridade'] == i for i in range(prioridades['Prioridade'].max()+1)]
 
+new_cols = data.columns.copy().to_list()
+new_cols[7:23] = [f"{col} (defesa)" for col in data.columns[7:23]]
+new_cols[23:39] = [f"{col} (criação de chances)" for col in data.columns[23:39]]
+new_cols[39:76] = [f"{col} (goleiro)" for col in data.columns[39:76]]
+new_cols[76:89] = [f"{col} (outros)" for col in data.columns[76:89]]
+new_cols[89:126] = [f"{col} (passe)" for col in data.columns[89:126]]
+new_cols[126:148] = [f"{col} (condução)" for col in data.columns[126:148]]
+new_cols[148:182] = [f"{col} (finalização e assistência)" for col in data.columns[148:182]]
+
+new_to_old = {new: old for new, old in zip(new_cols, data.columns)}
+data.columns = new_cols
+final_cols = [data.columns[idx_pri[i]] for i in range(prioridades['Prioridade'].max()+1)]
+data = pd.concat([data[final_cols[4]], data[final_cols[3]], data[final_cols[2]], data[final_cols[1]], data[final_cols[0]]], axis = 1)
+
+jl.include("python.jl")
 
 starting = st.checkbox("Apenas titulares", value = False)
 teams = data['Elenco'].unique()
@@ -273,10 +288,10 @@ team = st.selectbox("Time", teams)
 # dict_stats_default = {"Clr": 0.1,"SCA_SCA": 0.1,"PrgDist_Carries": 0.1,"Gls": 0.1, "PSxG+_per__minus__Expected": 0.1,
 #     "PrgR_Receiving": 0.1,"Tkl+Int": 0.1,"xA": 0.1,"PrgDist_Total": 0.1,"Succ_Take": 0.1}
 dict_stats = {}
-stats = st.multiselect("Atributos de interesse", options=data.columns[7:-5] )
+stats = st.multiselect("Atributos de interesse", options=data.columns[:-7])
 for stat in stats:
     pct = st.slider(f"Percentil de {stat}", 0, 100)
-    dict_stats.update({pt_to_eng[stat]: pct/100})
+    dict_stats.update({pt_to_eng[new_to_old[stat]]: pct/100})
 
 pred_method = st.radio("Método de previsão", ['Naïve', 'Normal', 'Séries temporais'], index = 0)
 formation = st.selectbox("Esquema tático", ['Qualquer', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])

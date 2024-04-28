@@ -1,0 +1,187 @@
+﻿Atributo,Prioridade
+Elenco,0
+Competição,0
+Jogador,0
+País,0
+Idade,0
+Nascimento,0
+Minutos/Partida,0
+Desarmes,2
+Desarmes certos,3
+Desarmes no terço defensivo,3
+Desarmes no terço médio,2
+Desarmes no terço ofensivo,3
+Dribles desarmados,3
+Dribles enfrentados,1
+Porcentagem de sucesso nos dribles enfrentados,2
+Dribles sofridos,1
+Bloqueios,3
+Bloqueios de chute,2
+Bloqueios de passe,2
+Interceptações,2
+Desarmes + Interceptações,3
+Afastamentos de bola,3
+Erros,1
+Chances criadas,3
+Chances criadas por partida,1
+Chances criadas por passes em jogo,2
+Chances criadas por bolas paradas,2
+Chances criadas por dribles,2
+Chances criadas por chutes,2
+Chances criadas por faltas sofridas,2
+Chances criadas por ações defensivas,2
+Gols criados,3
+Gols criados por partida,2
+Gols criados por passes em jogo,2
+Gols criados por bolas paradas,2
+Gols criados por dribles,2
+Gols criados por chutes,2
+Gols criados por faltas sofridas,2
+Gols criados por ações defensivas,2
+Gols sofridos,2
+Gols sofridos por partida,1
+Chutes a gol contra,1
+Defesas,2
+Porcentagem de defesa,2
+Empates,1
+Derrotas,1
+Jogos sem sofrer gols,1
+Porcentagem de jogos sem sofrer gols,2
+Pênaltis enfrentados,1
+Gols de pênalti sofridos,1
+Pênaltis defendidos,2
+Pênaltis enfrentados perdidos,1
+Porcentagem de defesa de pênalti,2
+Gols de falta sofridos,1
+Gols de escanteio sofridos,1
+Gols contra,1
+Gols sofridos esperados (PSxG),1
+Gols sofridos esperados por chute no gol (PSxG por chute no gol),1
+Gols salvos acima do esperado,4
+Gols salvos acima do esperado por partida,1
+Lançamentos certos,1
+Tentativas de lançamentos,1
+Porcentagem de acerto no lançamento,2
+Passes tentados por goleiro,1
+Lançamentos com a mão,1
+Porcentagem de lançamentos sobre passes,1
+Distância média dos passes,1
+Tiros de meta cobrados,1
+Porcentagem de lançamentos em tiros de meta,1
+Distância média dos tiros de meta cobrados,1
+Cruzamentos sofridos,1
+Cruzamentos interceptados,2
+Porcentagem de cruzamentos interceptados,2
+Ações de goleiro fora da área,2
+Ações de goleiro fora da área por partida,1
+Distância média das ações de líbero,2
+Cartões amarelos,1
+Cartões vermelhos,1
+Dois cartões amarelos no jogo,1
+Faltas cometidas,1
+Faltas sofridas,2
+Impedimentos,1
+Cruzamentos,2
+Pênaltis sofridos,2
+Pênaltis cometidos,1
+Bolas recuperadas,2
+Disputas áereas vencidas,2
+Disputas aéreas perdidas,1
+Porcentagem de sucesso nas disputas aéreas,2
+Passes certos,2
+Passes tentados,1
+Porcentagem de acerto no passe,2
+Distância total dos passes,2
+Distância progressiva dos passes,2
+Passes curtos certos,2
+Passes curtos tentados,1
+Porcentagem de acerto no passe curto,2
+Passes médios certos,2
+Passes médios tentados,1
+Porcentagem de acerto no passe médio,2
+Passes longos certos,2
+Passes longos tentados,1
+Porcentagem de acerto no passe longo,2
+Assistências,4
+Gols esperados de chutes assistidos (xAG),2
+Assistências esperadas (xA),3
+Diferença entre assistências e assistências esperadas,1
+Passes para finalizações,2
+Passes no terço final,2
+Passes para dentro da área,2
+Cruzamentos para dentro da área,2
+Passes progressivos,2
+Tentativas de passes,1
+Passes durante o jogo,1
+Passes em bola parada,1
+Passes em cobranças de faltas,1
+Passes em profundidade,2
+Inversões de jogo,2
+Laterais cobrados,1
+Escanteios cobrados,2
+Escanteios cobrados com curva por dentro,1
+Escanteios cobrados com curva por fora,1
+Escanteios cobrados sem curva,1
+Passes completos,2
+Passes para impedimento,1
+Passes bloqueados,1
+Toques na bola,2
+Toques na própria área,2
+Toques no terço defensivo,2
+Toques no terço médio,2
+Toques no terço ofensivo,2
+Toques na área adversária,2
+Toques durante o jogo,1
+Tentativas de drible,1
+Dribles certos,2
+Porcentagem de sucesso nos dribles,2
+Dribles errados,1
+Porcentagem de insucesso nos dribles,1
+Conduções de bola,1
+Distância percorrida conduzindo a bola,1
+Distância progressiva conduzindo a bola,2
+Conduções de bola progressivas,2
+Conduções de bola no terço final,2
+Conduções de bola para dentro da área adversária,2
+Perdas de controle de bola,1
+Conduções desarmadas,1
+Passes recebidos,1
+Passes progressivos recebidos,2
+Gols,4
+Finalizações,2
+Finalizações no gol,2
+Porcentagem de acerto no chute,2
+Finalizações por partida,1
+Finalizações no gol por partida,1
+Gols por finalização,2
+Gols por finalização no gol,2
+Distância média das finalizações,2
+Finalizações de falta,2
+Gols de pênalti,2
+Pênaltis cobrados,1
+Gols esperados (xG),2
+Gols esperados excluindo pênaltis (npxG),2
+Gols esperados por finalização excluindo pênaltis (npxG por finalização),1
+Diferença acima do esperado (Gols - xG),2
+Diferença acima do esperado excluindo pênaltis,2
+Min/Partida,1
+Gols + Assistências,2
+Gols (sem pênaltis),2
+Pênaltis convertidos,2
+Assistências esperadas (xAG),2
+Gols esperados (xG) + Assistência esperada (xAG),2
+Conduções progressivas,2
+Gols por partida,2
+Assistências por partida,2
+Gols + Assistências por partida,2
+Gols (sem pênaltis) por partida,2
+Gols esperados por partida,1
+Gols + Assistências (sem pênaltis) por partida,1
+Assistências esperadas por partida,1
+Gols esperados (xG) + Assistência esperada (xAG) por partida,1
+Gols esperados não pênalti (npxG) por partida,1
+Gols esperados (xG) + Assistência esperada (xAG) não pênalti por partida,1
+URL,0
+Nome,0
+Posição,0
+Valor,0
