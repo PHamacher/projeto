@@ -81,7 +81,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 
     ret = rs[:, vcat("Player", "Squad", "Position", "Age", "Value", [k for k in keys(dict_stats)])]
     ret[:,4:end] = round.(ret[:,4:end], digits=2)
-    return ret, sum(rs.Value), round(mean(score), digits=4), formation
+    return ret, sum(rs.Value), round(mean(score), digits=4), formation, starters(rs, formation)
 end
 
 function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
@@ -189,7 +189,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     idx(url) = findfirst(x -> x.Url == url, eachrow(data))
     ret = rs[:, vcat("Player", "Squad", "Position", "Apps", "Age", "Value", [k for k in keys(dict_stats)])]
     ret[:,5:end] = round.(ret[:,5:end], digits=2)
-    return ret, sum(rs.Value), round(mean(score), digits=4), formation
+    return ret, sum(rs.Value), round(mean(score), digits=4), formation, starters(rs, formation)
 
     # return rs, sum(rs.Value), mean(score), rsy, healthy[[idx(url) for url in rs.Url],:], pre_game_stats[[idx(url) for url in rs.Url],:,:]
 end

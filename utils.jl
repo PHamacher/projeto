@@ -50,6 +50,17 @@ dict_formations["3-4-3"] = [1,1,3,1,1,1,0,1,1,1]
 
 [@assert(sum(v) == 11) for (k,v) in dict_formations];
 
+function starters(roster::DataFrame, formation::String)
+    formation = dict_formations[formation]
+    starters = DataFrame()
+    for (pos, n) in zip(all_positions, formation)
+        options = filter(x -> x.Position == pos, roster)
+        sort!(options, :Apps, rev=true)
+        starters = vcat(starters, options[1:Int64(n),:])
+    end
+    return starters
+end
+
 # const DEFAULT_STATS = ["Tkl+Int", "Succ_Pressures", "SCA_SCA", "PrgDist_Total", "xA", "Succ_Dribbles", "PrgDist_Carries", "Prog_Receiving", "np:G_minus_xG_Expected"] # 2022
 const DEFAULT_STATS = ["Tkl+Int", "Clr", "SCA_SCA", "PrgDist_Total", "xA", "Succ_Take", "PrgDist_Carries", "PrgR_Receiving", "Gls", "PSxG+_per__minus__Expected"]
 

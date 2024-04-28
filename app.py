@@ -88,17 +88,19 @@ if st.button("Run"):
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
     df.columns = jl.names(x[0])
+    starters = pd.DataFrame(jl.eachrow(x[4]))
+    starters.columns = jl.names(x[4])
 
-    if starting:
-        df['Apps'] = ''
-        filtered = df
-    else:
-        df['Apps'] = df['Apps'].map(lambda x: int(x))
-        sorted_apps = df['Apps'].sort_values(ascending=False)
-        limit = sorted_apps.iloc[10]
-        filtered = df[df['Apps'] >= limit]
+    # if starting:
+    #     df['Apps'] = ''
+    #     filtered = df
+    # else:
+    #     df['Apps'] = df['Apps'].map(lambda x: int(x))
+    #     sorted_apps = df['Apps'].sort_values(ascending=False)
+    #     limit = sorted_apps.iloc[10]
+    #     filtered = df[df['Apps'] >= limit]
 
-    plt = desenha_campo(x[3], filtered)
+    plt = desenha_campo(x[3], starters)
     st.pyplot(plt)
 
     st.markdown("Recommended squad:")
