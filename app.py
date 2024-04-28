@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['axes.facecolor'] = 'green'
 
-dic_formações = {"3-5-2": ([53,15,25,25,53,47,47,70,85,85],[8,34,22,46,60,20,48,34,25,43]), "4-3-3": ([35,20,20,35,43,55,55,85,88,85],[10,25,43,58,34,22,46,10,34,58]), "4-1-4-1": ([30,20,20,30,44,60,60,60,60,85],[10,25,43,58,34,7,25,43,61,34]), "4-4-2": ([30,20,20,30,60,50,50,60,85,85],[10,25,43,58,10,25,43,58,25,43]), "3-4-3": ([55,20,27,27,55,50,50,82,88,82],[8,34,22,46,60,23,45,15,34,53])}
+dic_formações = {"3-5-2": ([53,15,25,25,53,47,47,70,85,85],[8,34,22,46,60,20,48,34,25,43]), "4-3-3": ([35,20,20,35,43,55,55,85,88,85],[10,25,43,58,34,22,46,10,34,58]), "4-1-4-1": ([30,20,20,30,44,60,60,60,60,85],[10,25,43,58,34,7,25,43,61,34]), "4-4-2": ([30,20,20,30,60,50,50,60,85,85],[10,25,43,58,10,25,43,58,25,43]), "3-4-3": ([55,20,27,27,55,50,50,82,88,82],[8,34,22,46,60,23,45,15,34,53]), "5-4-1" : ([55,20,27,27,55,50,50,82,88,82],[8,34,22,46,60,23,45,15,34,53])}
 
 def desenha_campo(form, df_orig, team_color = "white", secondary_color = "black"):
     df = df_orig.copy()
@@ -54,11 +54,220 @@ else:
 data['Age'] = (datetime(season, 7, 1) - data['Birth']).dt.days / 365
 data['Value'] = data['Value'] / 10**6
 
+col_names_eng = data.columns
+
+col_names_pt = [
+        "Elenco",
+        "Competição",
+        "Jogador",
+        "País",
+        "Idade",
+        "Nascimento",
+        "Minutos/Partida",
+        "Desarmes",
+        "Desarmes certos",
+        "Desarmes no terço defensivo",
+        "Desarmes no terço médio",
+        "Desarmes no terço ofensivo",
+        "Dribles desarmados",
+        "Dribles enfrentados",
+        "Porcentagem de sucesso nos dribles enfrentados",
+        "Dribles sofridos",
+        "Bloqueios",
+        "Bloqueios de chute",
+        "Bloqueios de passe",
+        "Interceptações",
+        "Desarmes + Interceptações",
+        "Afastamentos de bola",
+        "Erros",
+        "Chances criadas",
+        "Chances criadas por partida",
+        "Chances criadas por passes em jogo",
+        "Chances criadas por bolas paradas",
+        "Chances criadas por dribles",
+        "Chances criadas por chutes",
+        "Chances criadas por faltas sofridas",
+        "Chances criadas por ações defensivas",
+        "Gols criados",
+        "Gols criados por partida",
+        "Gols criados por passes em jogo",
+        "Gols criados por bolas paradas",
+        "Gols criados por dribles",
+        "Gols criados por chutes",
+        "Gols criados por faltas sofridas",
+        "Gols criados por ações defensivas",
+        "Gols sofridos",
+        "Gols sofridos por partida",
+        "Chutes a gol contra",
+        "Defesas",
+        "Porcentagem de defesa",
+        "Empates",
+        "Derrotas",
+        "Jogos sem sofrer gols",
+        "Porcentagem de jogos sem sofrer gols",
+        "Pênaltis enfrentados",
+        "Gols de pênalti sofridos",
+        "Pênaltis defendidos",
+        "Pênaltis enfrentados perdidos",
+        "Porcentagem de defesa de pênalti",
+        "Gols sofridos",
+        "Gols de pênalti sofridos",
+        "Gols de falta sofridos",
+        "Gols de escanteio sofridos",
+        "Gols contra",
+        "Gols sofridos esperados (PSxG)",
+        "Gols sofridos esperados por chute no gol (PSxG por chute no gol)",
+        "Gols salvos acima do esperado",
+        "Gols salvos acima do esperado por partida",
+        "Lançamentos certos",
+        "Tentativas de lançamentos",
+        "Porcentagem de acerto no lançamento",
+        "Passes tentados por goleiro",
+        "Lançamentos com a mão",
+        "Porcentagem de lançamentos sobre passes",
+        "Distância média dos passes",
+        "Tiros de meta cobrados",
+        "Porcentagem de lançamentos em tiros de meta",
+        "Distância média dos tiros de meta cobrados",
+        "Cruzamentos sofridos",
+        "Cruzamentos interceptados",
+        "Porcentagem de cruzamentos interceptados",
+        "Ações de goleiro fora da área",
+        "Ações de goleiro fora da área por partida",
+        "Distância média das ações de líbero",
+        "Cartões amarelos",
+        "Cartões vermelhos",
+        "Dois cartões amarelos no jogo",
+        "Faltas cometidas",
+        "Faltas sofridas",
+        "Impedimentos",
+        "Cruzamentos",
+        "Desarmes certos",
+        "Pênaltis sofridos",
+        "Pênaltis cometidos",
+        "Gols contra",
+        "Bolas recuperadas",
+        "Disputas áereas vencidas",
+        "Disputas aéreas perdidas",
+        "Porcentagem de sucesso nas disputas aéreas",
+        "Passes certos",
+        "Passes tentados",
+        "Porcentagem de acerto no passe",
+        "Distância total dos passes",
+        "Distância progressiva dos passes",
+        "Passes curtos certos",
+        "Passes curtos tentados",
+        "Porcentagem de acerto no passe curto",
+        "Passes médios certos",
+        "Passes médios tentados",
+        "Porcentagem de acerto no passe médio",
+        "Passes longos certos",
+        "Passes longos tentados",
+        "Porcentagem de acerto no passe longo",
+        "Assistências",
+        "Gols esperados de chutes assistidos (xAG)",
+        "Assistências esperadas (xA)",
+        "Diferença entre assistências e assistências esperadas",
+        "Passes para finalizações",
+        "Passes no terço final",
+        "Passes para dentro da área",
+        "Cruzamentos para dentro da área",
+        "Passes progressivos",
+        "Tentativas de passes"
+        "Passes durante o jogo",
+        "Passes em bola parada",
+        "Passes em cobranças de faltas",
+        "Passes em profundidade",
+        "Inversões de jogo",
+        "Cruzamentos",
+        "Laterais cobrados",
+        "Escanteios cobrados",
+        "Escanteios cobrados com curva por dentro",
+        "Escanteios cobrados com curva por fora",
+        "Escanteios cobrados sem curva",
+        "Passes completos",
+        "Passes para impedimento",
+        "Passes bloqueados",
+        "Toques na bola",
+        "Toques na própria área",
+        "Toques na defesa",
+        "Toques no terço defensivo",
+        "Toques no terço médio",
+        "Toques no terço ofensivo",
+        "Toques na área adversária",
+        "Toques durante o jogo",
+        "Tentativas de drible",
+        "Dribles certos",
+        "Porcentagem de sucesso nos dribles",
+        "Dribles errados",
+        "Porcentagem de insucesso nos dribles",
+        "Conduções de bola",
+        "Distância percorrida conduzindo a bola",
+        "Distância progressiva conduzindo a bola",
+        "Conduções de bola progressivas",
+        "Conduções de bola no terço final",
+        "Conduções de bola para dentro da área adversária",
+        "Perdas de controle de bola",
+        "Conduções desarmadas",
+        "Passes recebidos",
+        "Passes progressivos recebidos",    
+        "Gols",
+        "Finalizações",
+        "Finalizações no gol",
+        "Porcentagem de acerto no chute",
+        "Finalizações por partida",
+        "Finalizações no gol por partida",
+        "Gols por finalização",
+        "Gols por finalização no gol",
+        "Distância média das finalizações",
+        "Finalizações de falta",
+        "Gols de pênalti",
+        "Pênaltis cobrados",
+        "Gols esperados (xG)",
+        "Gols esperados excluindo pênaltis (npxG)",
+        "Gols esperados por finalização excluindo pênaltis (npxG por finalização)",
+        "Diferença acima do esperado (Gols - xG)",
+        "Diferença acima do esperado excluindo pênaltis",
+        "Min/Partida",
+        "Gols",
+        "Gols + Assistências",
+        "Gols (sem pênaltis)",
+        "Pênaltis convertidos",
+        "Pênaltis cobrados",
+        "Assistências esperadas (xAG)",
+        "Gols esperados (xG) + Assistência esperada (xAG)",
+        "Conduções progressivas",
+        "Passes progressivos",
+        "Passes progressivos recebidos",
+        "Gols por partida",
+        "Assistências por partida",
+        "Gols + Assistências por partida",
+        "Gols (sem pênaltis) por partida",
+        "Gols + Assistências (sem pênaltis) por partida",
+        "Gols esperados por partida",
+        "Assistências esperadas por partida",
+        "Gols esperados (xG) + Assistência esperada (xAG) por partida",
+        "Gols esperados não pênalti (npxG) por partida",
+        "Gols esperados (xG) + Assistência esperada (xAG) não pênalti por partida",
+        "URL",
+        "Nome",
+        "Nascimento",
+        "Posição",
+        "Valor",
+    ]
+    
+pt_to_eng = {pt: eng for pt, eng in zip(col_names_pt, col_names_eng)}
+data.columns = col_names_pt
+data = data.loc[:,~data.columns.duplicated()]
+
+positions_pt = {'Goalkeeper': 'Goleiro', 'Centre-Back': 'Zagueiro', 'Right-Back': 'Lateral Direito', 'Left-Back': 'Lateral Esquerdo', 'Defensive Midfield': 'Volante', 'Central Midfield': 'Meia Central', 'Right Midfield': 'Meia Direita', 'Left Midfield': 'Meia Esquerda', 'Attacking Midfield': 'Meia Ofensiva', 'Centre-Forward': 'Centroavante', 'Second Striker': 'Segundo Atacante', 'Right Winger': 'Ponta Direita', 'Left Winger': 'Ponta Esquerda'}
+data['Posição'] = data['Posição'].map(positions_pt)
+
 jl.include("python.jl")
 
 
 starting = st.checkbox("Apenas titulares", value = False)
-teams = data['Squad'].unique()
+teams = data['Elenco'].unique()
 teams.sort()
 team = st.selectbox("Time", teams)
 # dict_stats_default = {"Clr": 0.1,"SCA_SCA": 0.1,"PrgDist_Carries": 0.1,"Gls": 0.1, "PSxG+_per__minus__Expected": 0.1,
@@ -67,9 +276,9 @@ dict_stats = {}
 stats = st.multiselect("Atributos de interesse", options=data.columns[7:-5] )
 for stat in stats:
     pct = st.slider(f"Percentil de {stat}", 0, 100)
-    dict_stats.update({stat: pct/100})
+    dict_stats.update({pt_to_eng[stat]: pct/100})
 
-formation = st.selectbox("Esquema tático", ['Any', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])
+formation = st.selectbox("Esquema tático", ['Qualquer', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])
 budget = float(st.slider("Orçamento (milhões de euros)", 0, 1500))
 age = float(st.slider("Valor máximo para a idade média", 17, 42))
 keep = st.number_input("Percentagem mínima de jogadores a serem mantidos", 0, 100)/100 # ajeitar quando tiver segundo estágio
@@ -88,7 +297,7 @@ if st.button("Otimizar"):
     df = pd.DataFrame(jl.eachrow(x[0]))
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
-    df.columns = jl.names(x[0])
+    df.columns = ["Jogador", "Elenco", "Posição", "Jogos", "Idade", "Valor"] + stats
     starters = pd.DataFrame(jl.eachrow(x[4]))
     starters.columns = jl.names(x[4])
 

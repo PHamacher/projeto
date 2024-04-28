@@ -7,7 +7,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 
     data = deepcopy(data_orig)
 
-    if formation == "Any" # test all formations
+    if formation == "Qualquer" # test all formations
         formation_results = [recommend_signings_single_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
                                 age_limit = age_limit, min_keep = min_keep, own_players_val = own_players_val,
                                 formation=formation, budget=budget) for (formation,v) in dict_formations]
@@ -87,7 +87,7 @@ end
 function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
     age_limit = 45, pct_keep::Float64 = 0., own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix)
 
-    if formation == "Any" # test all formations
+    if formation == "Qualquer" # test all formations
         formation_results = [recommend_signings_multi_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
                                 age_limit = age_limit, pct_keep = pct_keep, own_players_val = own_players_val,
                                 formation=formation, budget=budget, scenarios=scenarios, max_players=max_players, gap=gap, healthy=healthy) for (formation,v) in dict_formations]
@@ -100,7 +100,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     # Sets
     I = collect(1:size(data,1))
     idx_current = pct_keep > 0 ? findall(x -> x.Squad == "Monaco", eachrow(data)) : Int64[]
-    idx_foreigners = foreigners > 0 ? findall(x -> !(x.Nation in vcat(europe,africa)), eachrow(data)) : Int64[] # Ligue 1
+    # idx_foreigners = foreigners > 0 ? findall(x -> !(x.Nation in vcat(europe,africa)), eachrow(data)) : Int64[] # Ligue 1
     S = [findfirst(x -> x == k, names(df_means)) for k in keys(dict_stats)]
     C = collect(1:scenarios) # S?
 
