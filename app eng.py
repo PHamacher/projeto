@@ -33,10 +33,9 @@ def desenha_campo(form, df_orig, team_color = "white", secondary_color = "black"
 
     return plt
 
-st.title('VITÓRIA')
-st.markdown('Value-based Intelligence for Transfers Optimization & Roster Improvement Analysis')
+st.title('Optimal Signings')
 
-season = st.radio("Temporada", [2023, 2022], horizontal=True)
+season = st.radio("Season", [2023, 2022], horizontal=True)
 data = pd.read_csv(f"dados/dados{season}.csv")
 df_means = pd.read_csv(f"dados/medias{season}.csv")
 data['Position'] = data['Position'].replace({
@@ -57,32 +56,32 @@ data['Value'] = data['Value'] / 10**6
 jl.include("python.jl")
 
 
-starting = st.checkbox("Apenas titulares", value = False)
+starting = st.checkbox("Only starters", value = False)
 teams = data['Squad'].unique()
 teams.sort()
-team = st.selectbox("Time", teams)
+team = st.selectbox("Team", teams)
 # dict_stats_default = {"Clr": 0.1,"SCA_SCA": 0.1,"PrgDist_Carries": 0.1,"Gls": 0.1, "PSxG+_per__minus__Expected": 0.1,
 #     "PrgR_Receiving": 0.1,"Tkl+Int": 0.1,"xA": 0.1,"PrgDist_Total": 0.1,"Succ_Take": 0.1}
 dict_stats = {}
-stats = st.multiselect("Atributos de interesse", options=data.columns[7:-5] )
+stats = st.multiselect("Attributes of interest", options=data.columns[7:-5] )
 for stat in stats:
-    pct = st.slider(f"Percentil de {stat}", 0, 100)
+    pct = st.slider(f"Percentile of {stat}", 0, 100)
     dict_stats.update({stat: pct/100})
 
-formation = st.selectbox("Esquema tático", ['Any', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])
-budget = float(st.slider("Orçamento (milhões de euros)", 0, 1500))
-age = float(st.slider("Valor máximo para a idade média", 17, 42))
-keep = st.number_input("Percentagem mínima de jogadores a serem mantidos", 0, 100)/100 # ajeitar quando tiver segundo estágio
+formation = st.selectbox("Formation", ['Any', '3-4-3', '3-5-2', '4-1-4-1', '4-3-3', '4-4-2', '5-4-1'])
+budget = float(st.slider("Budget (mi of euros)", 0, 1500))
+age = float(st.slider("Maximum average age", 17, 42))
+keep = st.number_input("Minimum percentage of players to be kept", 0, 100)/100 # ajeitar quando tiver segundo estágio
 own_val = 1.0
 time_limit = 60.0
 if not starting:
     # scenarios=scenarios, max_players=max_players, gap=gap, foreigners=foreigners, healthy=healthy)
-    scenarios = st.slider("Número de cenários", 1, 100) # aumentar o limite máximo?
+    scenarios = st.slider("Number of scenarios", 1, 100) # aumentar o limite máximo?
 else:
     scenarios = 0
     
 
-if st.button("Otimizar"):
+if st.button("Run"):
 
     x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios)    
     df = pd.DataFrame(jl.eachrow(x[0]))
@@ -104,10 +103,10 @@ if st.button("Otimizar"):
     plt = desenha_campo(x[3], starters)
     st.pyplot(plt)
 
-    st.markdown("Elenco recomendado:")
+    st.markdown("Recommended squad:")
     st.write(df)
 
-    st.markdown("Custo total (milhões de euros):")
+    st.markdown("Squad cost (millions of Euros):")
     st.write(x[1])
 
     st.markdown("Score:")
