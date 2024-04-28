@@ -306,7 +306,9 @@ if not starting:
 else:
     scenarios = 0
     
-
+execution_time = scenarios / 2.5
+execution_time *= 5 if formation == 'Qualquer' else 1
+st.markdown(f"Tempo estimado de execução: {int(execution_time)} segundos")
 if st.button("Otimizar"):
 
     x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
