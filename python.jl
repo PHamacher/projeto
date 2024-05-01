@@ -1,3 +1,5 @@
+import Pkg
+Pkg.add(["DataFrames", "CSV", "JuMP", "Gurobi", "Statistics", "Dates", "Random", "StatsBase", "Distributions"])
 using JuMP, Gurobi, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
 
 include("utils.jl")
