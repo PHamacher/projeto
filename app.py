@@ -313,6 +313,9 @@ if st.button("Otimizar"):
 
     x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
     df = pd.DataFrame(jl.eachrow(x[0]))
+    if len(df) == 0:
+        st.markdown("Não foi possível encontrar um elenco que satisfaça esses critérios.")
+        st.stop()
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
     df.columns = ["Jogador", "Elenco", "Posição", "Jogos", "Idade", "Valor"] + stats

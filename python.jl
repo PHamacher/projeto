@@ -191,8 +191,8 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     optimize!(model)
 
-    if termination_status(model) == MOI.INFEASIBLE
-    @warn "It is impossible to build a team respecting such constraints"
+    if termination_status(model) != MOI.OPTIMAL
+    #@warn "It is impossible to build a team respecting such constraints"
     return data[[],:], 0.0, 0.0, ""
     end
 
