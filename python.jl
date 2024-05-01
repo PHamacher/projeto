@@ -1,4 +1,4 @@
-using JuMP, Gurobi, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions, GLM
+using JuMP, Gurobi, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
 
 include("utils.jl")
 function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
