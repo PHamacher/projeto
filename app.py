@@ -548,7 +548,7 @@ data = pd.concat([data[final_cols[4]], data[final_cols[3]], data[final_cols[2]],
 
 # jl.include("python.jl")
 
-starting = st.checkbox("Apenas titulares", value = False)
+starting = False # st.checkbox("Apenas titulares", value = False)
 teams = data['Elenco'].unique()
 teams.sort()
 team = st.selectbox("Time", teams)
