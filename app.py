@@ -227,6 +227,9 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
 
     result = mathopt.solve(model, mathopt.SolverType.GSCIP)
 
+    if result.termination.reason != mathopt.TerminationReason.OPTIMAL:
+        return pd.DataFrame(), 0.0, 0.0, "", pd.DataFrame()
+
     data["Position"] = pd.Categorical(data["Position"], categories=all_positions, ordered=True)
     rs = data.loc[[i for i in I if abs(result.variable_values()[x[i]]) > 10**(-12)]]
     rsy = [data.loc[[i for i in I if abs(result.variable_values()[y[i, c]]) > 10**(-12)]] for c in C]
@@ -316,7 +319,7 @@ else:
 data['Age'] = (datetime(season, 7, 1) - data['Birth']).dt.days / 365
 data['Value'] = data['Value'] / 10**6
 
-# teste = recommended_signings("Real Madrid", 2023, {"Tkl+Int": 0.1, "SCA_SCA": 0.1}, time_limit=60.0, age_limit=45, pct_keep=0.0, starting11=False, own_players_val=1.0, formation="4-3-3", budget=900.0, scenarios=2)
+teste = recommended_signings("Real Madrid", 2023, {"Tkl+Int": 0.1, "SCA_SCA": 0.1}, time_limit=60.0, age_limit=45, pct_keep=0.0, starting11=False, own_players_val=1.0, formation="4-3-3", budget=900.0, scenarios=2)
 
 col_names_eng = data.columns
 
