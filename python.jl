@@ -1,6 +1,6 @@
-import Pkg
-Pkg.add(["DataFrames", "CSV", "JuMP", "GLPK", "Statistics", "Dates", "Random", "StatsBase", "Distributions"])
-using JuMP, GLPK, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
+#import Pkg
+#Pkg.add(["DataFrames", "CSV", "JuMP", "GLPK", "Statistics", "Dates", "Random", "StatsBase", "Distributions"])
+using JuMP, GLPK, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions, GLPK, GLM
 
 include("utils.jl")
 function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
@@ -200,7 +200,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     rs = sort(data[findall(x -> abs(x) > 10^(-12), JuMP.value.(x).data),:], [:Position], lt=position_sort)
     rsy = [sort(data[findall(x -> abs(x) > 10^(-12), JuMP.value.(y).data[:,c]),:], [:Position], lt=position_sort) for c in C]
-    rs[!, :Apps] = [count(x->x==p, vcat(map(x->x.Player, rsy)...)) for p in rs.Player]
+    rs[!, :Apps] = [count(y->y==p, vcat(map(x->x.Player, rsy)...)) for p in rs.Player]
 
     score = Float64[]
     for (stat, pct) in dict_stats
