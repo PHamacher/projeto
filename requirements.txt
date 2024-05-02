@@ -1,5 +1,7 @@
-juliacall
 pandas
 datetime
 numpy
 matplotlib
+scipy
+ortools
+random
