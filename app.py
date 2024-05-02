@@ -203,7 +203,7 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
         # sum(y[i,c]*data[i,stat] for i in I, c in C) >= quantile(df_means[:,stat], pct) * sum(y[i,c] for i in I, c in C)
         model.add_linear_constraint(sum(y[i, c]*data.loc[i, stat] for i in I for c in C) >= df_means[stat].quantile(pct) * sum(y[i, c] for i in I for c in C))
 
-    model.add_linear_constraint(sum(y[j, c] for j in idx_current for c in C) >= pct_keep * 11)
+    model.add_linear_constraint(sum(y[j, c] for j in idx_current for c in C) >= sum(pct_keep for c in C) * 11)
 
     model.add_linear_constraint(sum(y[i, c]*data.loc[i, "Age"] for i in I for c in C) <= age_limit * sum(y[i, c] for i in I for c in C))
 
