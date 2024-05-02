@@ -1,6 +1,6 @@
 import Pkg
-Pkg.add(["DataFrames", "CSV", "JuMP", "Cbc", "Statistics", "Dates", "Random", "StatsBase", "Distributions"])
-using JuMP, Cbc, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
+Pkg.add(["DataFrames", "CSV", "JuMP", "GLPK", "Statistics", "Dates", "Random", "StatsBase", "Distributions"])
+using JuMP, GLPK, CSV, DataFrames, Statistics, Dates, Random, StatsBase, Distributions
 
 include("utils.jl")
 function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats; time_limit::Float64 = 60.0,
@@ -23,7 +23,7 @@ function recommend_signings_single_stage(team::String, data_orig::DataFrame, df_
 
     data[idx_current, :Value] = Int64.(round.(own_players_val*data[idx_current, :Value]))
 
-    model = Model(Cbc.Optimizer)
+    model = Model(GLPK.Optimizer)
 
     set_optimizer_attribute(model, "time_limit", time_limit)
 
@@ -107,7 +107,7 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     data[idx_current, :Value] = Int64.(round.(own_players_val*data[idx_current, :Value]))
 
-    model = Model(Cbc.Optimizer)
+    model = Model(GLPK.Optimizer)
 
     set_time_limit_sec(model, time_limit)
     set_optimizer_attribute(model, "MIPGap", gap)
