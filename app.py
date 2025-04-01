@@ -1,4 +1,3 @@
-from juliacall import Main as jl
 import streamlit as st
 import pandas as pd
 from datetime import datetime # precisa?
@@ -279,7 +278,7 @@ data.columns = new_cols
 final_cols = [data.columns[idx_pri[i]] for i in range(prioridades['Prioridade'].max()+1)]
 data = pd.concat([data[final_cols[4]], data[final_cols[3]], data[final_cols[2]], data[final_cols[1]], data[final_cols[0]]], axis = 1)
 
-jl.include("python.jl")
+from optimization import recommended_signings
 
 starting = st.checkbox("Apenas titulares", value = False)
 teams = data['Elenco'].unique()
@@ -311,16 +310,16 @@ execution_time *= 5 if formation == 'Qualquer' else 1
 st.markdown(f"Tempo estimado de execução: {int(execution_time)} segundos")
 if st.button("Otimizar"):
 
-    x = jl.recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
-    df = pd.DataFrame(jl.eachrow(x[0]))
+    x = recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
+    df = pd.DataFrame(x[0])
     if len(df) == 0:
         st.markdown("Não foi possível encontrar um elenco que satisfaça esses critérios.")
         st.stop()
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
     df.columns = ["Jogador", "Elenco", "Posição", "Jogos", "Idade", "Valor"] + stats
-    starters = pd.DataFrame(jl.eachrow(x[4]))
-    starters.columns = jl.names(x[4])
+    starters = pd.DataFrame(x[4])
+    # starters.columns = x[4].columns
 
     # if starting:
     #     df['Apps'] = ''
