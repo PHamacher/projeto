@@ -131,7 +131,7 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
         elif pred_method == "Normal":
             pre_game = np.hstack([np.random.normal(data.iloc[i][stat], 2/3 * data[stat].std(), scenarios) 
                                    if data.iloc[i][stat] != 0 else np.zeros(scenarios) 
-                                   for i in range(len(data))])
+                                   for i in range(len(data))]).reshape(-1, scenarios)
         elif pred_method == "Séries temporais":
             stat_ = {"PrgR_Receiving": "Prog_Receiving", "Succ_Take": "Succ_Dribbles"}.get(stat, stat)
             pos_ = np.array([dict_positions[pos] for pos in data['Position']])
@@ -146,7 +146,7 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
             dists = [np.random.normal(eta[i], (upper[i] - lower[i]) / 1.96, scenarios) for i in range(len(data))]
             pre_game = np.column_stack(dists)  # SxI (inverter?)
         
-        pre_game_stats[:, k, :] = pre_game.T
+        pre_game_stats[:, k, :] = pre_game
 
     solver.Maximize(sum(y[i][c] * pre_game_stats[i, s, c] for i in I for c in C for s in range(len(dict_stats_norm))))
 
