@@ -69,11 +69,10 @@ def recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_
         score.append(((rs[stat] - mini) / (maxi - mini)).mean())
 
     ret = rs[['Player', 'Squad', 'Position', 'Age', 'Value'] + list(dict_stats.keys())]
-    ret.iloc[:, 4:] = ret.iloc[:, 4:].round(2)
 
     formation = dict_formations_rev[tuple([sum(rs['Position'] == pos) for pos in all_positions])]
 
-    return ret, rs['Value'].sum(), round(np.mean(score), 4), formation, starters(rs, formation), {formation: 1}
+    return ret, rs['Value'].sum(), np.mean(score), formation, starters(rs, formation), {formation: 1}
 
 def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_limit=60.0,
                                     age_limit=45, pct_keep=0.0, own_players_val=1.0, formation="", 
@@ -192,7 +191,6 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
         score.append(((rs[stat] - mini) / (maxi - mini)).mean())
 
     ret = rs[['Player', 'Squad', 'Position', 'Apps', 'Age', 'Value'] + list(dict_stats.keys())]
-    ret.iloc[:, 4:] = ret.iloc[:, 4:].round(2)
 
     formations_count = {k: 0 for k in dict_formations.keys()}
     for y in rsy:
@@ -201,7 +199,7 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
 
     main_formation = max(formations_count, key=formations_count.get)
 
-    return ret, rs['Value'].sum(), round(np.mean(score), 4), main_formation, starters(rs, main_formation), formations_count
+    return ret, rs['Value'].sum(), np.mean(score), main_formation, starters(rs, main_formation), formations_count
 
 def recommended_signings(team: str, season: int, dict_stats, time_limit: float = 60.0,
                          age_limit = 45, pct_keep: float = 0.0, starting11: bool = False, 

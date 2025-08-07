@@ -340,7 +340,7 @@ if st.button("Otimizar"):
     st.write(x[5])
 
     st.markdown("Custo total (milhões de euros):")
-    st.write(x[1])
+    st.write(round(x[1], 1))
 
     st.markdown("Score:")
-    st.write(x[2])
+    st.write(round(x[2], 4))
