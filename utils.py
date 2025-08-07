@@ -41,6 +41,7 @@ dict_formations = {
     "5-4-1": [1, 1, 3, 1, 1, 1, 0, 1, 1, 1],
     "3-4-3": [1, 1, 3, 1, 1, 1, 0, 1, 1, 1]
 }
+dict_formations_rev = {tuple(v): k for k, v in dict_formations.items()}
 
 assert all(sum(v) == 11 for v in dict_formations.values())
 

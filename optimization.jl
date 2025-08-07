@@ -14,6 +14,8 @@ function recommend_signings(team::String, data_orig::DataFrame, df_means::DataFr
     I = collect(1:size(data,1))
     idx_current = min_keep > 0 ? findall(x -> x in eachrow(lineup(team, data)), eachrow(data)) : Int64[]
     S = [findfirst(x -> x == k, names(df_means)) for k in keys(dict_stats)]
+    F = keys(dict_formations)
+    P = collect(1:length(all_positions))
 
     data[idx_current, :Value] = Int64.(round.(own_players_val*data[idx_current, :Value]))
 
@@ -22,6 +24,7 @@ function recommend_signings(team::String, data_orig::DataFrame, df_means::DataFr
     set_optimizer_attribute(model, "time_limit", time_limit)
 
     @variable(model, x[I], binary=true)
+    @variable(model, Z[F], Bin) # escolher o melhor esquema tático
 
     if budget == 0 # FO: minimizar custo
         @objective(model, Min, sum(x[i]*data.Value[i] for i in I))
@@ -51,13 +54,10 @@ function recommend_signings(team::String, data_orig::DataFrame, df_means::DataFr
 
     starting11 && @constraint(model, sum(x[i] for i in I) == 11)
 
-    positions = dict_formations[formation]
-    for (i, qtd_pos) in enumerate(positions)
-        pos_name = all_positions[i]
-        bool_pos = [name == pos_name for name in data.Position]
-
-        @constraint(model, sum(x[i]*bool_pos[i] for i in I) == qtd_pos)
-    end
+    bool_pos = [data[i,:Position] == all_positions[p] for i in I, p in P]
+    @constraint(model, [p in P], sum(x[i]*bool_pos[i,p] for i in I) == sum(dict_formations[f][p] * Z[f] for f in F))
+    @constraint(model, sum(Z[f] for f in F) == 1) # escolher apenas uma formação
+    formation != "" && @constraint(model, Z[formation] == 1)
 
     optimize!(model)
 
@@ -75,14 +75,6 @@ function recommend_signings(team::String, data_orig::DataFrame, df_means::DataFr
     end
 
     return rs, sum(rs.Value) / 10^6, mean(score)
-end
-
-function best_formation(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats::Dict{String, Float64}; time_limit::Float64 = 60.0,
-                        age_limit = 45, min_keep::Int64 = 11, starting11::Bool = true, own_players_val::Float64 = 1.0, budget::Float64=0.0)
-    formation_results = [recommend_signings(team, data_orig, df_means, dict_stats, time_limit=time_limit,age_limit=age_limit,min_keep=min_keep,
-                                            starting11=starting11,own_players_val=own_players_val,budget=budget, formation = formation) for (formation,v) in dict_formations]
-   val, idx = findmax(map(x -> x[3], formation_results)) # estou sempre maximizando score, minimizar custo talvez? 
-   return formation_results[idx]
 end
 
 # Parameters
@@ -104,10 +96,6 @@ rs, spent, score = recommend_signings(team, data, df_means, dict_stats; time_lim
 rs[:, vcat("Player", "Squad", [k for k in keys(dict_stats)], "Position", "Age", "Value")]
 filter(x -> x.Squad != team, rs)[:, vcat("Player", "Squad", [k for k in keys(dict_stats)], "Age", "Value")] # bought players
 filter(x -> !(x.Player in rs.Player), lineup(team,data))[:, vcat("Player", "Squad", [k for k in keys(dict_stats)], "Position", "Age", "Value")] # sold players
-
-best_rs, best_spent, best_score = best_formation(team, data, df_means, dict_stats; time_limit = time_limit, age_limit = age, min_keep = keep, starting11 = starting,
-                        own_players_val = own_val, budget = budget)
-
 
 # ---------
 
@@ -217,15 +205,7 @@ data.Injury_Prob = data.Injury_Prob .+ (1/yell + 1/red)
 # análises de sensibilidade: probabilidade lesão, esquemas táticos
 
 function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_means::DataFrame, dict_stats::Dict{String, Float64}; time_limit::Float64 = 60.0,
-    age_limit = 45, pct_keep::Float64 = 0., own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4, healthy::Matrix)
-
-    if formation == "" # test all formations
-        formation_results = [recommend_signings_multi_stage(team, data_orig, df_means, dict_stats; time_limit = time_limit,
-                                age_limit = age_limit, min_keep = min_keep, own_players_val = own_players_val,
-                                formation=formation, budget=budget, scenarios=scenarios, max_players=max_players) for (formation,v) in dict_formations]
-        val, idx = findmax(map(x -> x[3], formation_results))
-        return formation_results[idx]
-    end
+    age_limit = 45, pct_keep::Float64 = 0., own_players_val::Float64 = 1.0, formation::String="", budget::Float64=0.0, scenarios::Int64=100, max_players::Int64=1922, gap::Float64=0.01, foreigners::Int64=4)
 
     data = deepcopy(data_orig)
     # budget = budget*10^6 # millions of Euros
@@ -237,6 +217,8 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     idx_foreigners = foreigners > 0 ? findall(x -> !(x.Nation in vcat(europe,africa)), eachrow(data)) : Int64[] # Ligue 1
     S = [findfirst(x -> x == k, names(df_means)) for k in keys(dict_stats)]
     C = collect(1:scenarios) # S?
+    F = keys(dict_formations)
+    P = collect(1:length(all_positions))
 
     data[idx_current, :Value] = Int64.(round.(own_players_val*data[idx_current, :Value]))
     # data[!, :Value] = data.Value ./ 10^6 # millions of Euros
@@ -250,6 +232,8 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
     @variable(model, x[I], binary=true) # contratação
     @variable(model, y[I,C], binary=true) # escalação
     # @variable(model, z[I,C,]) # falta um terceiro índice
+    @variable(model, Z[F,C], Bin) # escolher o melhor esquema tático
+
     
     dict_stats_normalized = Dict{String, Vector{Float64}}()
     for (stat, pct) in dict_stats
@@ -259,15 +243,15 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     # Cenários
     Random.seed!(21)
-    # healthy = rand(size(data,1), scenarios) .> data.Injury_Prob
-    # healthy = BitMatrix(zeros(size(data,1), scenarios))
-    # for i in 1:size(data,1)
-    #     prob = data[i,:Injury_Prob]
-    #     num_scen_healthy = Int64(round(scenarios*(1-prob)))
-    #     v = BitArray(zeros(scenarios))
-    #     v[1:num_scen_healthy] = ones(num_scen_healthy)
-    #     healthy[i,:] = shuffle(v)
-    # end
+    healthy = rand(size(data,1), scenarios) .> data.Injury_Prob
+    healthy = BitMatrix(zeros(size(data,1), scenarios))
+    for i in 1:size(data,1)
+        prob = data[i,:Injury_Prob]
+        num_scen_healthy = Int64(round(scenarios*(1-prob)))
+        v = BitArray(zeros(scenarios))
+        v[1:num_scen_healthy] = ones(num_scen_healthy)
+        healthy[i,:] = shuffle(v)
+    end
 
     @constraint(model, budget_constraint, sum(x[i]*data.Value[i] for i in I) <= budget)
 
@@ -309,13 +293,10 @@ function recommend_signings_multi_stage(team::String, data_orig::DataFrame, df_m
 
     @constraint(model, [c in C], sum(y[i,c] for i in I) == 11) # redundante com a restrição de posições, mas whatever
 
-    positions = dict_formations[formation]
-    for (i, qtd_pos) in enumerate(positions)
-        pos_name = all_positions[i]
-        bool_pos = [name == pos_name for name in data.Position]
-
-        @constraint(model, [c in C], sum(y[i,c]*bool_pos[i] for i in I) == qtd_pos)
-    end
+    bool_pos = [data[i,:Position] == all_positions[p] for i in I, p in P]
+    @constraint(model, [p in P, c in C], sum(y[i,c]*bool_pos[i,p] for i in I) == sum(dict_formations[f][p] * Z[f,c] for f in F))
+    @constraint(model, [c in C], sum(Z[f,c] for f in F) == 1) # escolher apenas uma formação
+    formation != "" && @constraint(model, [c in C], Z[formation,c] == 1)
 
     @constraint(model, [i in I, c in C], y[i,c] <= x[i]) # só pode escalar se tiver contratado
     @constraint(model, [i in I, c in C], y[i,c] <= healthy[i,c]) # só pode escalar quem está disponível
@@ -347,9 +328,9 @@ end
 
 dict_stats, team, formation, budget, time_limit, age, keep, starting, own_val = create_input("dados/input monaco.csv")
 # keep = Int64(keep)
-rs, spent, score, y, health, stats = recommend_signings_multi_stage(team, data, df_means, dict_stats; time_limit = time_limit, age_limit = age, pct_keep = keep,
-                        own_players_val = own_val, formation = formation, budget = budget, scenarios = 100, max_players=50);
 
+@time rs, spent, obj, y, health, stats = recommend_signings_multi_stage(team, data, df_means, dict_stats; time_limit = time_limit, age_limit = age, pct_keep = keep,
+                        own_players_val = own_val, formation = formation, budget = budget, scenarios = 10, max_players=50, gap=0.05);
 
 rs[:, vcat("Player", "Squad", [k for k in keys(dict_stats)], "Position", "Age", "Value")]
 rs[:,[:Player,:Position,:Age,:Value,:Apps]]

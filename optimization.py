@@ -2,23 +2,18 @@ import numpy as np
 import pandas as pd
 from ortools.linear_solver import pywraplp
 
-from utils import lineup, starters, all_positions, dict_formations, df_regs, dict_positions, sort_order
+from utils import lineup, starters, all_positions, dict_formations, dict_formations_rev, df_regs, dict_positions, sort_order
 
 def recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_limit=60.0,
-                                     age_limit=45, min_keep=11, starting11=True, own_players_val=1.0, formation="", budget=0.0):
+                                     age_limit=45, min_keep=11, starting11=True, own_players_val=1.0, formation="Qualquer", budget=0.0):
 
     data = data_orig.copy()
-
-    if formation == "Qualquer":
-        formation_results = [recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_limit=time_limit,
-                                                             age_limit=age_limit, min_keep=min_keep, own_players_val=own_players_val,
-                                                             formation=v, budget=budget) for v in dict_formations.keys()]
-        val, idx = max((x[2], i) for i, x in enumerate(formation_results))
-        return formation_results[idx]
 
     I = list(range(len(data)))
     idx_current = [i for i in range(len(data)) if data.iloc[i].isin(lineup(team, data)).any()] if min_keep > 0 else []
     S = [data.columns.get_loc(k) for k in dict_stats.keys()]
+    F = dict_formations.keys()
+    P = list(range(len(all_positions)))
 
     data.loc[idx_current, 'Value'] = (own_players_val * data.loc[idx_current, 'Value']).round().astype(int)
 
@@ -27,6 +22,7 @@ def recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_
     solver.SetTimeLimit(int(time_limit * 1000))
 
     x = [solver.BoolVar(f'x[{i}]') for i in I]
+    z = [solver.BoolVar(f'z[{f}]') for f in F] # escolher o melhor esquema tático
 
     if budget == 0:
         solver.Minimize(solver.Sum(x[i] * data['Value'].iloc[i] for i in I))
@@ -50,12 +46,14 @@ def recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_
     if starting11:
         solver.Add(solver.Sum(x[i] for i in I) == 11)
 
-    positions = dict_formations[formation]
-    for i, qtd_pos in enumerate(positions):
-        pos_name = all_positions[i]
-        bool_pos = [name == pos_name for name in data['Position']]
+    bool_pos = [[int(data.iloc[i]['Position'] == all_positions[p]) for p in P] for i in I]
 
-        solver.Add(solver.Sum(x[i] * bool_pos[i] for i in I) == qtd_pos)
+    for p in P:
+        solver.Add(solver.Sum(x[i] * bool_pos[i][p] for i in I) <= sum(dict_formations[f][p] * z[f] for f in F))
+    solver.Add(solver.Sum(z[f] for f in F) == 1)
+
+    if formation != "Qualquer":
+        solver.Add(z[formation] == 1)    
 
     status = solver.Solve()
 
@@ -72,20 +70,15 @@ def recommend_signings_single_stage(team, data_orig, df_means, dict_stats, time_
 
     ret = rs[['Player', 'Squad', 'Position', 'Age', 'Value'] + list(dict_stats.keys())]
     ret.iloc[:, 4:] = ret.iloc[:, 4:].round(2)
-    return ret, rs['Value'].sum(), round(np.mean(score), 4), formation, starters(rs, formation)
+
+    formation = dict_formations_rev[tuple([sum(rs['Position'] == pos) for pos in all_positions])]
+
+    return ret, rs['Value'].sum(), round(np.mean(score), 4), formation, starters(rs, formation), {formation: 1}
 
 def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_limit=60.0,
                                     age_limit=45, pct_keep=0.0, own_players_val=1.0, formation="", 
                                     budget=0.0, scenarios=100, max_players=1922, gap=0.01, 
                                     pred_method="Naïve"):
-    
-    if formation == "Qualquer":
-        formation_results = [recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_limit=time_limit,
-                                                             age_limit=age_limit, pct_keep=pct_keep, own_players_val=own_players_val,
-                                                             formation=v, budget=budget, scenarios=scenarios, max_players=max_players,
-                                                             gap=gap, pred_method=pred_method) for v in dict_formations.keys()]
-        val, idx = max((x[2], i) for i, x in enumerate(formation_results))
-        return formation_results[idx]
 
     data = data_orig.copy()
 
@@ -93,6 +86,8 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
     idx_current = [i for i in I if pct_keep > 0 and data.iloc[i]['Squad'] == team]
     S = [data.columns.get_loc(k) for k in dict_stats.keys()]
     C = list(range(scenarios))
+    F = dict_formations.keys()
+    P = list(range(len(all_positions)))
 
     data.iloc[idx_current].Value = (own_players_val * data.iloc[idx_current].Value).round().astype(int)
 
@@ -101,6 +96,7 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
 
     x = {i: solver.BoolVar(f'x[{i}]') for i in I}
     y = {i: {c: solver.BoolVar(f'y[{i},{c}]') for c in C} for i in I}
+    z = {f: {c: solver.BoolVar(f'z[{f},{c}]') for c in C} for f in F} # escolher o melhor esquema tático
 
     dict_stats_norm = {}
     for stat, pct in dict_stats.items():
@@ -157,14 +153,18 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
     for c in C:
         solver.Add(sum(y[i][c] for i in I) == 11)
 
-    positions = dict_formations[formation]
-    for i, qtd_pos in enumerate(positions):
-        pos_name = all_positions[i]
-        bool_pos = (data['Position'] == pos_name).values
-        bool_pos = np.array(bool_pos).astype(int) # gambiarra
+    bool_pos = np.array([[int(data.iloc[i]['Position'] == all_positions[p]) for p in P] for i in I])
 
+    for p in P:
         for c in C:
-            solver.Add(sum(y[i][c] * bool_pos[i] for i in I) == qtd_pos)
+            solver.Add(sum(y[i][c] * bool_pos[i, p] for i in I) == sum(dict_formations[f][p] * z[f][c] for f in F))
+
+    for c in C:
+        solver.Add(sum(z[f][c] for f in F) == 1)
+
+    if formation != "Qualquer":
+        for c in C:
+            solver.Add(z[formation][c] == 1)
 
     for i in I:
         for c in C:
@@ -193,7 +193,15 @@ def recommend_signings_multi_stage(team, data_orig, df_means, dict_stats, time_l
 
     ret = rs[['Player', 'Squad', 'Position', 'Apps', 'Age', 'Value'] + list(dict_stats.keys())]
     ret.iloc[:, 4:] = ret.iloc[:, 4:].round(2)
-    return ret, rs['Value'].sum(), round(np.mean(score), 4), formation, starters(rs, formation)
+
+    formations_count = {k: 0 for k in dict_formations.keys()}
+    for y in rsy:
+        position_counts = [sum(y['Position'] == pos) for pos in all_positions]
+        formations_count[dict_formations_rev[tuple(position_counts)]] += 1
+
+    main_formation = max(formations_count, key=formations_count.get)
+
+    return ret, rs['Value'].sum(), round(np.mean(score), 4), main_formation, starters(rs, main_formation), formations_count
 
 def recommended_signings(team: str, season: int, dict_stats, time_limit: float = 60.0,
                          age_limit = 45, pct_keep: float = 0.0, starting11: bool = False, 
@@ -203,8 +211,8 @@ def recommended_signings(team: str, season: int, dict_stats, time_limit: float =
     
     data = pd.read_csv(f"dados/dados{season}.csv")
     data['Position'].replace({"midfield": "Centre-Back", "Second Striker": "Centre-Forward", 
-                               "Right Midfield": "Right Winger", "Left Midfield": "Left Winger", 
-                               "attack": "Left Winger"}, inplace=True)
+                                "Right Midfield": "Right Winger", "Left Midfield": "Left Winger", 
+                                "attack": "Left Winger"}, inplace=True)
     
     df_means = pd.read_csv(f"dados/medias{season}.csv")
     data = data[data['Mins_Per_90'] >= 5]

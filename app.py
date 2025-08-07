@@ -336,6 +336,9 @@ if st.button("Otimizar"):
     st.markdown("Elenco recomendado:")
     st.write(df)
 
+    st.markdown("Uso de cada esquema tático:")
+    st.write(x[5])
+
     st.markdown("Custo total (milhões de euros):")
     st.write(x[1])
 
