@@ -310,15 +310,15 @@ execution_time *= 5 if formation == 'Qualquer' else 1
 st.markdown(f"Tempo estimado de execução: {int(execution_time)} segundos")
 if st.button("Otimizar"):
 
-    x = recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
-    df = pd.DataFrame(x[0])
+    (df,cost,score,formation,starters,formations_count) = recommended_signings(team, season, dict_stats, time_limit = time_limit, age_limit = age, pct_keep = keep, starting11 = starting, own_players_val = own_val, formation = formation, budget = budget, scenarios = scenarios, pred_method = pred_method)    
+    df = pd.DataFrame(df)
     if len(df) == 0:
         st.markdown("Não foi possível encontrar um elenco que satisfaça esses critérios.")
         st.stop()
     # df[df.columns[:4]] = df[df.columns[:4]].map(lambda x: str(x))
     df = df.map(lambda x: str(x))
     df.columns = ["Jogador", "Elenco", "Posição", "Jogos", "Idade", "Valor"] + stats
-    starters = pd.DataFrame(x[4])
+    starters = pd.DataFrame(starters)
     # starters.columns = x[4].columns
 
     # if starting:
@@ -330,17 +330,17 @@ if st.button("Otimizar"):
     #     limit = sorted_apps.iloc[10]
     #     filtered = df[df['Apps'] >= limit]
 
-    plt = desenha_campo(x[3], starters)
+    plt = desenha_campo(formation, starters)
     st.pyplot(plt)
 
     st.markdown("Elenco recomendado:")
     st.write(df)
 
     st.markdown("Uso de cada esquema tático:")
-    st.write(x[5])
+    st.write(formations_count)
 
     st.markdown("Custo total (milhões de euros):")
-    st.write(round(x[1], 1))
+    st.write(round(cost, 1))
 
     st.markdown("Score:")
-    st.write(round(x[2], 4))
+    st.write(round(score, 4))
